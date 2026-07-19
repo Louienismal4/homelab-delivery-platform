@@ -18,6 +18,14 @@ jobs:
       - name: Start application
         run: docker compose up -d --wait
 
+      - name: Start application and show logs if it fails
+        run: |
+          docker compose up -d --wait || {
+          docker compose ps
+          docker compose logs
+          exit 1
+          }
+
       - name: Check API health and database readiness
         run: |
           curl --fail http://localhost:3000/health
