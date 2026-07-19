@@ -8,4 +8,8 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT || 5432),
 });
 
+pool.on("error", (error) => {
+  console.error("Unexpected PostgreSQL client error:", error.message);
+});
+
 module.exports = pool;

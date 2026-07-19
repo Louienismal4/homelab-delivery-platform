@@ -5,15 +5,25 @@ app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
-app.get("/notes", async (req, res) => {
-  const result = await pool.query("SELECT * FROM notes");
-  res.json(result.rows);
+app.get("/notes", async (_req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM notes");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Failed to get notes:", error.message);
+    res.status(503).json({ error: "Database unavailable" });
+  }
 });
 
 app.post("/notes", async (req, res) => {
-  const { content } = req.body;
-  await pool.query("INSERT INTO notes (content) VALUES ($1)", [content]);
-  res.status(201).send("Note added");
+  try {
+    const { content } = req.body;
+    await pool.query("INSERT INTO notes (content) VALUES ($1)", [content]);
+    res.status(201).send("Note added");
+  } catch (error) {
+    console.error("Failed to add note:", error.message);
+    res.status(503).json({ error: "Database unavailable" });
+  }
 });
 
 app.get("/ready", async (_req, res) => {
@@ -40,5 +50,17 @@ async function start() {
     process.exit(1);
   }
 }
+
+async function initializeDatabase() {
+  try {
+    await pool.query(
+      "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, content TEXT)",
+    );
+  } catch (error) {
+    console.error("Database initialization failed:", error.message);
+  }
+}
+
+initializeDatabase();
 
 start();
