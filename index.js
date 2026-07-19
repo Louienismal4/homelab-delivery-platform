@@ -35,32 +35,20 @@ app.get("/ready", async (_req, res) => {
     res.status(503).json({ status: "not ready" });
   }
 });
+async function initializeDatabase() {
+  await pool.query(
+    "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, content TEXT)",
+  );
+}
 
 async function start() {
   try {
-    await pool.query(
-      "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, content TEXT)",
-    );
+    await initializeDatabase();
     app.listen(3000, () => console.log("Server running on port 3000"));
   } catch (error) {
-    console.error(
-      "Database connection failed. Start PostgreSQL locally or run `docker compose up --build`.",
-    );
-    console.error(error.message);
+    console.error("Database initialization failed:", error.message);
     process.exit(1);
   }
 }
-
-async function initializeDatabase() {
-  try {
-    await pool.query(
-      "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, content TEXT)",
-    );
-  } catch (error) {
-    console.error("Database initialization failed:", error.message);
-  }
-}
-
-initializeDatabase();
 
 start();
