@@ -16,6 +16,16 @@ app.post("/notes", async (req, res) => {
   res.status(201).send("Note added");
 });
 
+app.get("/ready", async (_req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.status(200).json({ status: "ready" });
+  } catch (error) {
+    console.error("Readiness check failed:", error);
+    res.status(503).json({ status: "not ready" });
+  }
+});
+
 async function start() {
   try {
     await pool.query(
