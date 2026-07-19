@@ -1,4 +1,14 @@
-Symptom: /ready returns 503
-Diagnosis: docker compose ps and docker compose logs app
-Recovery: docker compose start db
-Verification: curl /ready returns 200
+# Database Outage Runbook
+
+## Symptom
+
+- `GET /ready` returns `503`
+- `GET /notes` returns `503 Database unavailable`
+
+## Diagnose
+
+```bash
+docker compose ps
+docker compose logs app --tail=100
+docker compose logs db --tail=100
+```
